@@ -1,0 +1,1 @@
+docker run --rm -v `pwd`:`pwd` trzeci/emscripten emcc ./main/io.cpp ./main/quinticpolynomial.cpp ./main/spline.cpp ./main/tankmodel.cpp --no-entry -Os -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"ccall\", \"cwrap\"]' --bind -I main/include --std=gnu++17 -o squiggles.js

@@ -1,31 +1,33 @@
-import { useEffect, useRef, useState } from 'react'
-import cv from '../services/cv'
+import { useEffect, useRef, useState } from "react";
+import cv from "../services/cv";
 
 // We'll limit the processing size to 200px.
-const maxVideoSize = 200
+const maxVideoSize = 200;
 
 export default function Page() {
-  const [processing, setProcessing] = useState(false)
-  const videoElement = useRef(null)
-  const canvasEl = useRef(null)
+  const [processing, setProcessing] = useState(false);
+  const videoElement = useRef(null);
+  const canvasEl = useRef(null);
 
   /**
    * What we will do in the onClick event is capture a frame within
    * the video to pass this image on our service.
    */
   async function onClick() {
-    setProcessing(true)
+    setProcessing(true);
 
-    const ctx = canvasEl.current.getContext('2d')
-    ctx.drawImage(videoElement.current, 0, 0, maxVideoSize, maxVideoSize)
-    const image = ctx.getImageData(0, 0, maxVideoSize, maxVideoSize)
+    const ctx = canvasEl.current.getContext("2d");
+    ctx.drawImage(videoElement.current, 0, 0, maxVideoSize, maxVideoSize);
+    const image = ctx.getImageData(0, 0, maxVideoSize, maxVideoSize);
     // Load the model
-    await cv.load()
+    await cv.load();
     // Processing image
-    const processedImage = await cv.imageProcessing(image)
+    // const processedImage = await cv.imageProcessing(image)
+    const val = await cv.test();
+    console.log(val);
     // Render the processed image to the canvas
-    ctx.putImageData(processedImage.data.payload, 0, 0)
-    setProcessing(false)
+    // ctx.putImageData(processedImage.data.payload, 0, 0);
+    setProcessing(false);
   }
 
   /**
@@ -37,40 +39,40 @@ export default function Page() {
    */
   useEffect(() => {
     async function setupCamera() {
-      videoElement.current.width = maxVideoSize
-      videoElement.current.height = maxVideoSize
+      videoElement.current.width = maxVideoSize;
+      videoElement.current.height = maxVideoSize;
 
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: false,
           video: {
-            facingMode: 'user',
+            facingMode: "user",
             width: maxVideoSize,
             height: maxVideoSize,
           },
-        })
-        videoElement.current.srcObject = stream
+        });
+        videoElement.current.srcObject = stream;
 
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           videoElement.current.onloadedmetadata = () => {
-            resolve(videoElement.current)
-          }
-        })
+            resolve(videoElement.current);
+          };
+        });
       }
       const errorMessage =
-        'This browser does not support video capture, or this device does not have a camera'
-      alert(errorMessage)
-      return Promise.reject(errorMessage)
+        "This browser does not support video capture, or this device does not have a camera";
+      alert(errorMessage);
+      return Promise.reject(errorMessage);
     }
 
     async function load() {
-      const videoLoaded = await setupCamera()
-      videoLoaded.play()
-      return videoLoaded
+      const videoLoaded = await setupCamera();
+      videoLoaded.play();
+      return videoLoaded;
     }
 
-    load()
-  }, [])
+    load();
+  }, []);
 
   /**
    * What we're going to render is:
@@ -88,19 +90,19 @@ export default function Page() {
   return (
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
       }}
     >
       <video className="video" playsInline ref={videoElement} />
-      <button 
-        disabled={processing} 
-        style={{ width: maxVideoSize, padding: 10 }} 
+      <button
+        disabled={processing}
+        style={{ width: maxVideoSize, padding: 10 }}
         onClick={onClick}
       >
-        {processing ? 'Processing...' : 'Take a photo'}
+        {processing ? "Processing..." : "Take a photo"}
       </button>
       <canvas
         ref={canvasEl}
@@ -108,5 +110,5 @@ export default function Page() {
         height={maxVideoSize}
       ></canvas>
     </div>
-  )
+  );
 }
